@@ -1,0 +1,14 @@
+{
+    "recorder": {
+        "streamer": "somecoolstreamer",
+        "quality": "best"
+    },
+    "twitch": {
+        "client_id": "xxxxx",
+        "oauth": "xxxxx"
+    },
+    "pushover": {
+        "token": "xxxxx",
+        "user": "xxxxx"
+    }
+}
