@@ -190,7 +190,7 @@ class TwitchRecorder:
     def run(self):
         # Set recording path
         self.rec_path = os.path.join(self.root_path, "recs")
-        if(os.path.isdir(self.rec_path) is False):
+        if(os.path.isdir(self.rec_path) == False):
             os.makedirs(self.rec_path)
 
         # Check interval
@@ -212,7 +212,8 @@ class TwitchRecorder:
         self.status = 3
         try:
             self.r = requests.get(
-                self.url, headers={"Client-ID": self.tw_client_id}, timeout=15)
+                self.url, headers={"Client-ID": self.tw_client_id,
+                                   "Authorization": "Bearer " + self.tw_oauth_token}, timeout=15)
             self.r.raise_for_status()
             self.info = self.r.json()
             try:
@@ -230,20 +231,20 @@ class TwitchRecorder:
         while True:
             # Status messages
             status = self.check_user()
-            if status is 3:
+            if status == 3:
                 logging.error("Unexpected error. Will try again in 5 minutes.")
                 time.sleep(300)
-            elif status is 2:
+            elif status == 2:
                 logging.error("streamer not found. Invalid streamer or typo.")
                 time.sleep(self.refresh)
-            elif status is 1:
+            elif status == 1:
                 logging.info(self.streamer + " currently offline, checking again in " +
                              str(self.refresh) + " seconds.")
                 time.sleep(self.refresh)
-            elif status is 0:
+            elif status == 0:
                 logging.info(self.streamer + " is live. Recording ...")
                 self.filename = self.streamer + "_" + \
-                    datetime.datetime.now().strftime("%Y-%m-%d_%Hh%Mm%Ss") + ".ts"
+                    datetime.datetime.now().strftime("%Y-%m-%d_%Hh%Mm%Ss") + ".mkv"
 
                 # File name
                 self.rec_filename = os.path.join(self.rec_path, self.filename)
