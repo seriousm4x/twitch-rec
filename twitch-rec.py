@@ -16,7 +16,7 @@ import urllib
 
 class Colorlog():
     logging.basicConfig(
-        format='[\033[1;32m%(asctime)s\033[1;0m] [%(levelname)s] %(message)s', level=logging.INFO)
+        format='[\033[1;32m%(asctime)s\033[1;0m] [%(levelname)s] %(message)s', level=logging.WARNING)
     logging.addLevelName(
         logging.ERROR, "\033[1;31m%s\033[1;0m" % logging.getLevelName(logging.ERROR))
     logging.addLevelName(
