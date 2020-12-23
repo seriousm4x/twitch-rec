@@ -1,1 +1,1 @@
-streamlink==1.5.0
+streamlink==2.0.0
