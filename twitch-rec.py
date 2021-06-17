@@ -1,9 +1,11 @@
+#!/usr/bin/env python3
+
 import datetime
 import json
 import logging
 import os
-import time
 import subprocess
+import time
 
 import requests
 import streamlink
@@ -86,7 +88,6 @@ def main():
                 write_settings(settings_file, settings)
                 logger.debug("Successfully created oauth token.")
 
-
         # check stream status
         status = check_stream(
             settings["rec"]["streamer"], settings["twitch"]["client_id"], settings["twitch"]["oauth"])
@@ -123,8 +124,10 @@ def main():
         video_file = os.path.join("recordings", file_name)
 
         # open stream and write to file
-        cmd = ["streamlink", f"twitch.tv/{settings['rec']['streamer']}", settings['rec']['quality'], "--twitch-disable-hosting", "--twitch-disable-ads", "--twitch-disable-reruns", "-o", video_file]
-        p = subprocess.Popen(cmd, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        cmd = ["streamlink", f"twitch.tv/{settings['rec']['streamer']}", settings['rec']['quality'],
+               "--twitch-disable-hosting", "--twitch-disable-ads", "--twitch-disable-reruns", "-o", video_file]
+        p = subprocess.Popen(cmd, universal_newlines=True,
+                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
         while True:
             output = p.stdout.readline()
@@ -132,7 +135,6 @@ def main():
                 break
             if output:
                 logger.info(output.strip())
-
 
         # send pushover message
         if settings["pushover"]["token"] and settings["pushover"]["user"]:
@@ -159,7 +161,8 @@ if __name__ == "__main__":
     # setup logging
     if not os.path.isdir("logs"):
         os.mkdir("logs")
-    log_file = os.path.join("logs", datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".log")
+    log_file = os.path.join(
+        "logs", datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".log")
     logger = logging.getLogger('twitch-rec')
     logger.setLevel(logging.DEBUG)
     fh = logging.FileHandler(
