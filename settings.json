@@ -1,0 +1,16 @@
+{
+    "rec": {
+        "streamer": "wubbl0rz",
+        "quality": "best",
+        "interval": 15
+    },
+    "twitch": {
+        "client_id": "xxxxx",
+        "client_secret": "xxxxx",
+        "oauth": ""
+    },
+    "pushover": {
+        "token": "",
+        "user": ""
+    }
+}
