@@ -7,6 +7,8 @@ import os
 import subprocess
 import time
 
+from pathlib import Path
+
 import requests
 import streamlink
 
@@ -54,6 +56,8 @@ def check_stream(streamer, client_id, oauth):
 
     return status
 
+def check_path(path):
+    Path(path).mkdir(exist_ok=True)
 
 def read_settings(_file):
     with open(_file, "r", encoding="utf-8") as f:
@@ -65,11 +69,32 @@ def write_settings(_file, data):
     with open(_file, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
 
+def create_settings(_file):
+    data = {"rec": "", "twitch": "", "pushover": ""}
+    data["rec"] = {"streamer": "xxxxx", "quality": "best", "interval": 15}
+    data["twitch"] = {"client_id": "xxxxx", "client_secret": "xxxxx", "oauth": ""}
+    data["pushover"] = {"token": "", "user": ""}
+    check_path("config/")
+    with open(_file, "x", encoding="utf-8") as f:
+        json.dump(data, f, indent=4)
+
 
 def main():
     while True:
+        settings_file = Path("config/settings.json")
+        legacy_settings_file = Path("settings.json")
+
+        #move old settings file if exists
+        if legacy_settings_file.exists():
+            check_path("config/")
+            legacy_settings_file.replace(settings_file)
+
+        #create settings file if needed
+        if not settings_file.exists():
+            create_settings(settings_file)
+            exit(f"{settings_file} file created. Please replace \"xxxxx\" values by your own and restart the script")
+
         # read settings
-        settings_file = "settings.json"
         settings = read_settings(settings_file)
         try:
             settings["rec"]["streamer"]

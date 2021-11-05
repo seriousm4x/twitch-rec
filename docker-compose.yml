@@ -1,0 +1,13 @@
+version: '3.5'
+services:
+  twitch-rec:
+    restart: always
+    build:
+      context: .
+    image: twitch-rec
+    container_name: twitch-rec
+    volumes:
+      - ${PWD}/vids:/app/recordings
+      - ${PWD}/config:/app/config
+    environment:
+      TZ: Europe/Paris
