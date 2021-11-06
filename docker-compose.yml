@@ -1,13 +1,17 @@
-version: '3.5'
+version: '3'
 services:
   twitch-rec:
-    restart: always
-    build:
-      context: .
-    image: twitch-rec
     container_name: twitch-rec
+    build: .
+    restart: always
     volumes:
-      - ${PWD}/vids:/app/recordings
-      - ${PWD}/config:/app/config
+      - ./recordings:/app/recordings
     environment:
+      STREAMER: xxxxx
+      QUALITY: best
+      INTERVAL: 15
+      CLIENT_ID: xxxxx
+      CLIENT_SECRET: xxxxx
+      PUSHOVER_TOKEN: xxxxx
+      PUSHOVER_USER: xxxxx
       TZ: Europe/Paris

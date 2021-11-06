@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 
 import datetime
-import json
 import logging
 import os
 import subprocess
 import time
-
-from pathlib import Path
 
 import requests
 import streamlink
@@ -27,13 +24,13 @@ def update_bearer(client_id, client_secret):
 
 def check_stream(streamer, client_id, oauth):
     # Check if user online, 0: online, 1: offline, 2: not found, 3: error
-    url = "https://api.twitch.tv/helix/streams?user_login=" + streamer
+    url = f"https://api.twitch.tv/helix/streams?user_login={streamer}"
     info = None
     status = 3
     try:
         headers = {
             "Client-ID": client_id,
-            "Authorization": "Bearer " + oauth
+            "Authorization": f"Bearer {oauth}"
         }
         r = requests.get(url, headers=headers, timeout=15)
         r.raise_for_status()
@@ -56,73 +53,24 @@ def check_stream(streamer, client_id, oauth):
 
     return status
 
-def check_path(path):
-    Path(path).mkdir(exist_ok=True)
-
-def read_settings(_file):
-    with open(_file, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    return data
-
-
-def write_settings(_file, data):
-    with open(_file, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4)
-
-def create_settings(_file):
-    data = {"rec": "", "twitch": "", "pushover": ""}
-    data["rec"] = {"streamer": "xxxxx", "quality": "best", "interval": 15}
-    data["twitch"] = {"client_id": "xxxxx", "client_secret": "xxxxx", "oauth": ""}
-    data["pushover"] = {"token": "", "user": ""}
-    check_path("config/")
-    with open(_file, "x", encoding="utf-8") as f:
-        json.dump(data, f, indent=4)
-
 
 def main():
+    env_streamer = os.environ.get("STREAMER")
+    env_quality = os.environ.get("QUALITY")
+    env_interval = os.environ.get("INTERVAL")
+    env_client_id = os.environ.get("CLIENT_ID")
+    env_client_secret = os.environ.get("CLIENT_SECRET")
+    env_pu_token = os.environ.get("PUSHOVER_TOKEN")
+    env_pu_user = os.environ.get("PUSHOVER_USER")
+    bearer = update_bearer(env_client_id, env_client_secret)
+
     while True:
-        settings_file = Path("config/settings.json")
-        legacy_settings_file = Path("settings.json")
-
-        #move old settings file if exists
-        if legacy_settings_file.exists():
-            check_path("config/")
-            legacy_settings_file.replace(settings_file)
-
-        #create settings file if needed
-        if not settings_file.exists():
-            create_settings(settings_file)
-            exit(f"{settings_file} file created. Please replace \"xxxxx\" values by your own and restart the script")
-
-        # read settings
-        settings = read_settings(settings_file)
-        try:
-            settings["rec"]["streamer"]
-            settings["rec"]["quality"]
-            settings["twitch"]["client_id"]
-            settings["twitch"]["client_secret"]
-            logger.debug("Settings passed.")
-        except KeyError:
-            logging.error(
-                "Streamer, quality, client_id and client_secret are mandatory for running the script. Please add them in the settings.json file.")
-        if not settings["twitch"]["oauth"]:
-            bearer = update_bearer(
-                settings["twitch"]["client_id"], settings["twitch"]["client_secret"])
-            if bearer:
-                settings["twitch"]["oauth"] = bearer
-                write_settings(settings_file, settings)
-                logger.debug("Successfully created oauth token.")
-
         # check stream status
-        status = check_stream(
-            settings["rec"]["streamer"], settings["twitch"]["client_id"], settings["twitch"]["oauth"])
+        status = check_stream(env_streamer, env_client_id, bearer)
         if status == 401:
             logger.debug("API request unauthorized. Requesting now token.")
-            bearer = update_bearer(
-                settings["twitch"]["client_id"], settings["twitch"]["client_secret"])
+            bearer = update_bearer(env_client_id, env_client_secret)
             if bearer:
-                settings["twitch"]["oauth"] = bearer
-                write_settings(settings_file, settings)
                 logger.debug("Successfully updated oauth token.")
             continue
         elif status == 3:
@@ -131,25 +79,23 @@ def main():
             continue
         elif status == 2:
             logger.error("Streamer not found. Invalid streamer or typo.")
-            time.sleep(settings["rec"]["interval"])
+            time.sleep(env_interval)
             continue
         elif status == 1:
             logger.info(
-                f"{settings['rec']['streamer']} currently offline. Checking again in {settings['rec']['interval']} seconds.")
-            time.sleep(settings["rec"]["interval"])
+                f"{env_streamer} currently offline. Checking again in {env_interval} seconds.")
+            time.sleep(env_interval)
             continue
 
         # stream live
-        logger.info(f"{settings['rec']['streamer']} is live. Recording ...")
-        file_name = settings["rec"]["streamer"] + "_" + \
+        logger.info(f"{env_streamer} is live. Recording ...")
+        file_name = env_streamer + "_" + \
             datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".mkv"
 
-        if not os.path.isdir("recordings"):
-            os.mkdir("recordings")
         video_file = os.path.join("recordings", file_name)
 
         # open stream and write to file
-        cmd = ["streamlink", f"twitch.tv/{settings['rec']['streamer']}", settings['rec']['quality'],
+        cmd = ["streamlink", f"twitch.tv/{env_streamer}", env_quality,
                "--twitch-disable-hosting", "--twitch-disable-ads", "--twitch-disable-reruns", "-o", video_file]
         p = subprocess.Popen(cmd, universal_newlines=True,
                              stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -162,10 +108,10 @@ def main():
                 logger.info(output.strip())
 
         # send pushover message
-        if settings["pushover"]["token"] and settings["pushover"]["user"]:
+        if env_pu_token and env_pu_user:
             data = {
-                "token": settings["pushover"]["token"],
-                "user": settings["pushover"]["user"],
+                "token": env_pu_token,
+                "user": env_pu_user,
                 "html": "1",
                 "message": f"Recorded: {file_name}"
             }
@@ -184,21 +130,12 @@ def main():
 
 if __name__ == "__main__":
     # setup logging
-    if not os.path.isdir("logs"):
-        os.mkdir("logs")
-    log_file = os.path.join(
-        "logs", datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + ".log")
     logger = logging.getLogger('twitch-rec')
     logger.setLevel(logging.DEBUG)
-    fh = logging.FileHandler(
-        filename=log_file, mode="w", encoding="utf-8")
-    fh.setLevel(logging.DEBUG)
     sh = logging.StreamHandler()
     sh.setLevel(logging.DEBUG)
     formatter = logging.Formatter("[%(asctime)s] [%(levelname)s] %(message)s")
-    fh.setFormatter(formatter)
     sh.setFormatter(formatter)
-    logger.addHandler(fh)
     logger.addHandler(sh)
 
     main()

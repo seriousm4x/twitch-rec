@@ -5,9 +5,6 @@ WORKDIR /app
 ADD requirements.txt ./
 ADD twitch-rec.py ./
 
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# to store videos and config files
-VOLUME [ "/app/recordings", "/app/config" ]
-
-ENTRYPOINT [ "python", "twitch-rec.py" ]
+ENTRYPOINT ["python", "twitch-rec.py"]
