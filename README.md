@@ -31,6 +31,28 @@ If you wanna use pushover, paste a token and user id. If not, just leave it blan
 python3 twitch-rec.py
 ```
 
+## Docker
+
+Sample docker-compose.yml file to build image and spin-up a container.
+
+Change %%EDITME%% with the absolute path of the folder you want to store the vids at.
+
+```
+version: '3.5'
+services:
+  twitch-rec:
+    restart: always
+    build:
+      context: .
+    image: twitch-rec
+    container_name: twitch-rec
+    volumes:
+      - %%EDITME%%:/app/recs
+      - ${PWD}/config:/app/config
+    environment:
+      TZ: Europe/Paris
+```
+
 ## Contributing
 
 Feel free to contribute and bring in your ideas to enhance this tool or to add more notification possibilities.
