@@ -4,54 +4,40 @@ twitch-rec will record your favorite streamer so you don't have to rely on VODs 
 
 ## Getting Started
 
-```
-git clone https://github.com/seriousm4x/twitch-rec.git && cd twitch-rec
-```
-
-Install dependencies
+Sample docker-compose.yml file to build image and spin-up a container. Clone the repo and change the placeholders.
 
 ```
-pip3 install -r requirements.txt
-```
-
-Edit the `settings.json` file. There are 4 mandatory values:
-
-* streamer
-* quality
-* client_id
-* client_secret
-
-The last 2 can be created at [dev.twitch.tv/console/apps](https://dev.twitch.tv/console/apps).
-
-Leave `oauth` empty. The script will create it for you.
-
-If you wanna use pushover, paste a token and user id. If not, just leave it blank.
-
-```
-python3 twitch-rec.py
-```
-
-## Docker
-
-Sample docker-compose.yml file to build image and spin-up a container.
-
-Change %%EDITME%% with the absolute path of the folder you want to store the vids at.
-
-```
-version: '3.5'
+version: '3'
 services:
   twitch-rec:
-    restart: always
-    build:
-      context: .
-    image: twitch-rec
     container_name: twitch-rec
+    build: .
+    restart: always
     volumes:
-      - %%EDITME%%:/app/recs
-      - ${PWD}/config:/app/config
+      - ./recordings:/app/recordings
     environment:
+      STREAMER: xxxxx
+      QUALITY: best
+      INTERVAL: 15
+      CLIENT_ID: xxxxx
+      CLIENT_SECRET: xxxxx
+      PUSHOVER_TOKEN: xxxxx
+      PUSHOVER_USER: xxxxx
       TZ: Europe/Paris
 ```
+
+## Things to change in docker-compose.yml:
+
+* volume path "recordings" to the folder you want to store the vids at
+* STREAMER
+* CLIENT_ID
+* CLIENT_SECRET
+* PUSHOVER_TOKEN
+* PUSHOVER_USER
+
+`CLIENT_ID` and `CLIENT_SECRET` can be created at [dev.twitch.tv/console/apps](https://dev.twitch.tv/console/apps).
+
+If you don't use pushover, just delete both lines.
 
 ## Contributing
 
