@@ -57,7 +57,7 @@ def check_stream(streamer, client_id, oauth):
 def main():
     env_streamer = os.environ.get("STREAMER")
     env_quality = os.environ.get("QUALITY")
-    env_interval = os.environ.get("INTERVAL")
+    env_interval = int(os.environ.get("INTERVAL"))
     env_client_id = os.environ.get("CLIENT_ID")
     env_client_secret = os.environ.get("CLIENT_SECRET")
     env_pu_token = os.environ.get("PUSHOVER_TOKEN")
