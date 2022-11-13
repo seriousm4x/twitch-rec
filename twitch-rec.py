@@ -13,12 +13,10 @@ import streamlink
 def update_bearer(client_id, client_secret):
     tokenurl = f"https://id.twitch.tv/oauth2/token?client_id={client_id}&client_secret={client_secret}&grant_type=client_credentials"
     try:
-        print("------")
         token_response = requests.post(tokenurl)
         token_response.raise_for_status()
         token_json_response = token_response.json()
         bearer = token_json_response["access_token"]
-        print("------")
         return bearer
     except Exception as e:
         logger.error(e)
