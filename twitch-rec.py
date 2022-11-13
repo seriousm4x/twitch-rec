@@ -13,10 +13,12 @@ import streamlink
 def update_bearer(client_id, client_secret):
     tokenurl = f"https://id.twitch.tv/oauth2/token?client_id={client_id}&client_secret={client_secret}&grant_type=client_credentials"
     try:
+        print("------")
         token_response = requests.post(tokenurl)
         token_response.raise_for_status()
         token_json_response = token_response.json()
         bearer = token_json_response["access_token"]
+        print("------")
         return bearer
     except Exception as e:
         logger.error(e)
@@ -57,7 +59,7 @@ def check_stream(streamer, client_id, oauth):
 def main():
     env_streamer = os.environ.get("STREAMER")
     env_quality = os.environ.get("QUALITY")
-    env_interval = os.environ.get("INTERVAL")
+    env_interval = int(os.environ.get("INTERVAL"))
     env_client_id = os.environ.get("CLIENT_ID")
     env_client_secret = os.environ.get("CLIENT_SECRET")
     env_pu_token = os.environ.get("PUSHOVER_TOKEN")
