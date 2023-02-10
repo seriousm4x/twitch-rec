@@ -1,7 +1,8 @@
-version: '3'
+version: "3"
 services:
   twitch-rec:
     container_name: twitch-rec
+    user: 1000:1000
     build: .
     restart: always
     volumes:

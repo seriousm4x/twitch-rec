@@ -11,6 +11,7 @@ version: '3'
 services:
   twitch-rec:
     container_name: twitch-rec
+    user: 1000:1000
     build: .
     restart: always
     volumes:
@@ -28,12 +29,12 @@ services:
 
 ## Things to change in docker-compose.yml:
 
-* volume path "recordings" to the folder you want to store the vids at
-* STREAMER
-* CLIENT_ID
-* CLIENT_SECRET
-* PUSHOVER_TOKEN
-* PUSHOVER_USER
+- volume path "recordings" to the folder you want to store the vids at
+- STREAMER
+- CLIENT_ID
+- CLIENT_SECRET
+- PUSHOVER_TOKEN
+- PUSHOVER_USER
 
 `CLIENT_ID` and `CLIENT_SECRET` can be created at [dev.twitch.tv/console/apps](https://dev.twitch.tv/console/apps).
 
