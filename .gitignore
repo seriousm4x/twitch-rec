@@ -238,3 +238,4 @@ $RECYCLE.BIN/
 logs
 recordings
 config
+docker-compose.yml
